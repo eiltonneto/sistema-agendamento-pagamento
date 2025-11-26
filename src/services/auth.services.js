@@ -34,7 +34,10 @@ export async function login(data) {
   if (!valid) throw new Error("Senha incorreta.");
 
   const token = jwt.sign(
-    { id_usuario: user.id_usuario },
+    { 
+    id_usuario: user.id_usuario,
+    tipo_usuario: user.tipo_usuario,
+  },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
   );
@@ -43,6 +46,7 @@ export async function login(data) {
     id_usuario: user.id_usuario,
     nome: user.nome,
     email: user.email,
+    tipo_usuario: user.tipo_usuario,
     token
   };
 }
