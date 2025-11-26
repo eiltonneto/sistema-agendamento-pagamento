@@ -1,0 +1,31 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --watch server.js",
+    "prisma:init": "npx prisma init",
+    "prisma:generate": "npx prisma generate",
+    "prisma:pull": "npx prisma db pull && npx prisma generate",
+    "test": "echo \"no test yet\" && exit 0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^6.19.0",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "nodemon": "^3.1.10",
+    "prisma": "^6.19.0"
+  }
+}

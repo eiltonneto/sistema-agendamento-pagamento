@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model agendamento {
+  id_agendamento                                    Int                     @id @default(autoincrement())
+  id_cliente                                        Int
+  id_slot                                           Int
+  id_admin_responsavel                              Int?
+  status_agendamento                                String?                 @default("pendente") @db.VarChar(20)
+  compareceu                                        Boolean?                @default(false)
+  data_criacao                                      DateTime?               @default(now()) @db.Timestamp(6)
+  data_atualizacao                                  DateTime?               @db.Timestamp(6)
+  cancelado_por                                     Int?
+  data_cancelamento                                 DateTime?               @db.Timestamp(6)
+  motivo_cancelamento                               String?
+  usuario_agendamento_cancelado_porTousuario        usuario?                @relation("agendamento_cancelado_porTousuario", fields: [cancelado_por], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+  usuario_agendamento_id_admin_responsavelTousuario usuario?                @relation("agendamento_id_admin_responsavelTousuario", fields: [id_admin_responsavel], references: [id_usuario], onUpdate: NoAction)
+  usuario_agendamento_id_clienteTousuario           usuario                 @relation("agendamento_id_clienteTousuario", fields: [id_cliente], references: [id_usuario], onDelete: Cascade, onUpdate: NoAction)
+  grade_horario                                     grade_horario           @relation(fields: [id_slot], references: [id_slot], onDelete: Cascade, onUpdate: NoAction)
+  historico_agendamento                             historico_agendamento[]
+  notificacao                                       notificacao[]
+  pagamento                                         pagamento[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model grade_horario {
+  id_slot     Int           @id @default(autoincrement())
+  id_quadra   Int
+  data        DateTime      @db.Date
+  hora_inicio DateTime      @db.Time(6)
+  hora_fim    DateTime      @db.Time(6)
+  agendamento agendamento[]
+  quadra      quadra        @relation(fields: [id_quadra], references: [id_quadra], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model historico_agendamento {
+  id_historico     Int          @id @default(autoincrement())
+  id_cliente       Int?
+  id_agendamento   Int?
+  data_agendamento DateTime     @db.Date
+  status_final     String?      @db.VarChar(20)
+  compareceu       Boolean?     @default(false)
+  observacao       String?
+  agendamento      agendamento? @relation(fields: [id_agendamento], references: [id_agendamento], onDelete: NoAction, onUpdate: NoAction)
+  usuario          usuario?     @relation(fields: [id_cliente], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model notificacao {
+  id_notificacao                          Int          @id @default(autoincrement())
+  id_cliente                              Int?
+  id_agendamento                          Int?
+  tipo                                    String       @db.VarChar(20)
+  fluxo                                   String?      @db.VarChar(20)
+  mensagem                                String?
+  status                                  Boolean?     @default(false)
+  data_envio                              DateTime?    @default(now()) @db.Timestamp(6)
+  id_usuario                              Int?
+  agendamento                             agendamento? @relation(fields: [id_agendamento], references: [id_agendamento], onDelete: Cascade, onUpdate: NoAction)
+  usuario_notificacao_id_clienteTousuario usuario?     @relation("notificacao_id_clienteTousuario", fields: [id_cliente], references: [id_usuario], onDelete: Cascade, onUpdate: NoAction)
+  usuario_notificacao_id_usuarioTousuario usuario?     @relation("notificacao_id_usuarioTousuario", fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model pagamento {
+  id_pagamento     Int         @id @default(autoincrement())
+  id_agendamento   Int
+  id_cliente       Int
+  metodo_pagamento String?     @db.VarChar(30)
+  valor_total      Decimal     @db.Decimal(10, 2)
+  valor_pago       Decimal     @db.Decimal(10, 2)
+  status_pagamento String?     @db.VarChar(20)
+  data_pagamento   DateTime?   @db.Timestamp(6)
+  id_transacao     String?     @db.VarChar(100)
+  comprovante_url  String?
+  agendamento      agendamento @relation(fields: [id_agendamento], references: [id_agendamento], onDelete: Cascade, onUpdate: NoAction)
+  usuario          usuario     @relation(fields: [id_cliente], references: [id_usuario], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model quadra {
+  id_quadra     Int             @id @default(autoincrement())
+  nome          String          @db.VarChar(80)
+  ativa         Boolean?        @default(true)
+  id_usuario    Int?
+  grade_horario grade_horario[]
+  usuario       usuario?        @relation(fields: [id_usuario], references: [id_usuario], onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model relatorio {
+  id_relatorio        Int       @id @default(autoincrement())
+  tipo                String?   @db.VarChar(30)
+  periodo_inicio      DateTime? @db.Date
+  periodo_fim         DateTime? @db.Date
+  total_agendamentos  Int?
+  total_pagamentos    Int?
+  total_cancelamentos Int?
+  data_geracao        DateTime? @default(now()) @db.Timestamp(6)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model usuario {
+  id_usuario                                            Int                     @id @default(autoincrement())
+  nome                                                  String                  @db.VarChar(100)
+  telefone                                              String?                 @db.VarChar(20)
+  email                                                 String                  @unique @db.VarChar(120)
+  cpf                                                   String?                 @unique @db.VarChar(14)
+  senha_hash                                            String
+  tipo_usuario                                          String                  @db.VarChar(20)
+  data_cadastro                                         DateTime?               @default(now()) @db.Timestamp(6)
+  status                                                Boolean?                @default(true)
+  uuid_usuario_hash                                     String?                 @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  agendamento_agendamento_cancelado_porTousuario        agendamento[]           @relation("agendamento_cancelado_porTousuario")
+  agendamento_agendamento_id_admin_responsavelTousuario agendamento[]           @relation("agendamento_id_admin_responsavelTousuario")
+  agendamento_agendamento_id_clienteTousuario           agendamento[]           @relation("agendamento_id_clienteTousuario")
+  historico_agendamento                                 historico_agendamento[]
+  notificacao_notificacao_id_clienteTousuario           notificacao[]           @relation("notificacao_id_clienteTousuario")
+  notificacao_notificacao_id_usuarioTousuario           notificacao[]           @relation("notificacao_id_usuarioTousuario")
+  pagamento                                             pagamento[]
+  quadra                                                quadra[]
+}

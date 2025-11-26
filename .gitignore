@@ -1,0 +1,20 @@
+# Node
+node_modules/
+npm-debug.log
+
+# Environment (important!)
+.env
+
+# Prisma
+# DO NOT ignore migrations — needed for DB structure
+prisma/*.db
+
+# If generated client exists outside node_modules (usually not)
+src/generated/prisma/
+
+# Logs
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
