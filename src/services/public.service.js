@@ -1,28 +1,54 @@
 import prisma from "../database/prisma.js";
 
-// QUADRAS
+// LISTAR QUADRAS
 export async function getQuadras() {
   return prisma.quadra.findMany({
+    where: { ativa: true },
     select: {
-      id: true,
+      id_quadra: true,
       nome: true,
-      descricao: true,
-      imagem: true,
-      tipo: true,
-      tamanho: true
+      ativa: true,
     }
   });
 }
 
-// GRADE DE HORÁRIOS
-export async function getGrade(quadraId) {
-  return prisma.grade_horario.findMany({
-    where: { quadra_id: Number(quadraId) },
-    orderBy: { horario: "asc" }
+// DETALHE DE UMA QUADRA
+export async function getQuadraById(id) {
+  return prisma.quadra.findUnique({
+    where: { id_quadra: Number(id) },
+    select: {
+      id_quadra: true,
+      nome: true,
+      ativa: true,
+    }
   });
 }
 
-// SOBRE (informações institucionais)
+// LISTAR GRADE DE UMA QUADRA EM UM DIA
+export async function getGrade(quadraId, dataISO) {
+  const data = new Date(dataISO); // formato: YYYY-MM-DD
+
+  return prisma.grade_horario.findMany({
+    where: {
+      id_quadra: Number(quadraId),
+      data: data
+    },
+    select: {
+      id_slot: true,
+      data: true,
+      hora_inicio: true,
+      hora_fim: true,
+      agendamento: {
+        select: {
+          status_agendamento: true
+        }
+      }
+    },
+    orderBy: { hora_inicio: "asc" }
+  });
+}
+
+// SOBRE O CLUBE (hardcoded por enquanto)
 export async function getSobre() {
   return {
     nome: "Society Club",
@@ -32,16 +58,4 @@ export async function getSobre() {
     descricao:
       "Campo society premium com vestiário, estacionamento, iluminação profissional e ambiente familiar."
   };
-}
-
-// TABELA DE PREÇOS
-export async function getPrecos() {
-  return prisma.preco.findMany({
-    select: {
-      id: true,
-      dia_semana: true,
-      valor_hora: true,
-      promocao: true
-    }
-  });
 }

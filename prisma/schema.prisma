@@ -126,4 +126,20 @@ model usuario {
   notificacao_notificacao_id_usuarioTousuario           notificacao[]           @relation("notificacao_id_usuarioTousuario")
   pagamento                                             pagamento[]
   quadra                                                quadra[]
+  financeiro_registros                                  financeiro[]            @relation("UsuarioFinanceiro")
+
 }
+
+model financeiro {
+  id_financeiro   Int       @id @default(autoincrement())
+  tipo            String    
+  categoria       String?   
+  descricao       String?
+  valor           Decimal
+  data_registro   DateTime  @default(now())
+  registrado_por  Int?
+
+  usuario         usuario?  @relation("UsuarioFinanceiro", fields: [registrado_por], references: [id_usuario])
+}
+
+

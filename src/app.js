@@ -6,25 +6,28 @@ import userRoutes from "./routes/user.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import publicRoutes from "./routes/public.routes.js";
 import agendamentoRoutes from "./routes/agendamento.routes.js";
+import gradeRoutes from "./routes/grade.routes.js";
+import financeiroRoutes from "./routes/financeiro.routes.js";
 
 dotenv.config();
 
-// Inicializar app
 const app = express();
 
 // Middlewares globais
 app.use(cors());
 app.use(express.json());
 
-// Rota inicial
+// Rota principal de teste
 app.get("/", (req, res) => {
-  res.send("Servidor rodando!    ");
+  res.send("Servidor rodando!");
 });
 
-// Rotas
-app.use("/auth", authRoutes);
-app.use("/usuarios", userRoutes);
-app.use("/api", publicRoutes);
-app.use("/agendamentos", agendamentoRoutes);
+// ROTAS
+app.use("/auth", authRoutes);                     // login e registro
+app.use("/usuarios", userRoutes);                 // listar usuários
+app.use("/api", publicRoutes);                    // vitrine (quadras / sobre)
+app.use("/agendamentos", agendamentoRoutes);      // criar / cancelar / listar
+app.use("/api/quadras", gradeRoutes);             // criar grade (admin)
+app.use("/financeiro", financeiroRoutes);      
 
 export default app;
